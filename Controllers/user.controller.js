@@ -3,7 +3,7 @@ const { jwtToken } = require("../utils/jwt");
 const { AppError } = require("../utils/errorHandler");
 const { sign } = require("jsonwebtoken");
 
-async function signUp(req, res, next) {
+async function signup(req, res, next) {
   try {
     const signupDetials = {
       username: req.body.username,
@@ -66,4 +66,4 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { signUp, login };
+module.exports = { signup, login };
