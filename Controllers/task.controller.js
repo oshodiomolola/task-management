@@ -1,8 +1,6 @@
 const { Task } = require("../Models/task")
 const mongoose = require("mongoose")
 const { AppError } = require("../utils/errorHandler")
-// const newObjectId = new objectId();
-
 
 async function createTask(req, res, next) {
   try {
@@ -28,25 +26,19 @@ return next(new AppError("Please input task"))
   }
 }
 
-async function taskStatus(req, res, next) {
+async function updateStatus(req, res, next) {
   try {
-    const { status } = req.body;
+    const findTask = await Task.findById(req.params.id)
+console.log(req.query)
+    if(!findTask) {
+      return next(new AppError("update task status", 404))
+    }
+    
+findTask.status = req.query.status
+await findTask.save()
+res.status(200).json({result: "success", message: "Task status updated", findTask})
 
-    switch (status) {
-      case "pending":
-        console.log("Task is pending");
-        throw new AppError("Task is pending", 400);
-      case "in-progress":
-        console.log("Task is in progress");
-        throw new AppError("Task is in progress", 400);
-      case "completed":
-        console.log("Task is completed");
-        throw new AppError("Task is completed", 400);
-      default:
-        console.log("Unknown task status");
-        throw new AppError("Task status is unknown", 400);
-        res.status(200).json({result: "Success"})
-    } 
+
   } catch (error) {
     console.error("Error:", error);
     next(error);
@@ -55,9 +47,7 @@ async function taskStatus(req, res, next) {
 
 async function viewTask(req, res, next) {
   try {
-    const userId = req.user._id;
-
-    const userTasks = await Task.find({ user: userId });
+    const userTasks = await Task.find({user:req.user._id})
 
     if (!userTasks || userTasks.length === 0) {
       return next(new AppError('No tasks found for this user', 404));
@@ -82,7 +72,7 @@ async function updateTask(req, res, next) {
       return next(new AppError("Please provide title and description for the task", 400));
     }
 
-    const updatedTask = await Task.findById(req.params.taskId);
+    const updatedTask = await Task.findById(req.params.id);
 
     if (!updatedTask) {
       return next(new AppError('Task not found', 404));
@@ -102,17 +92,7 @@ async function updateTask(req, res, next) {
 
 async function deleteTask(req, res, next) {
   try {
-    const taskDetail = {
-      title: req.body.title,
-      description: req.body.description,
-      user: req.user._id
-    }
-
-    if (!taskDetail.title || !taskDetail.description) {
-      return next(new AppError("Please provide title and description for the task", 400));
-    }
-
-    const deletedTask = await Task.findByIdAndDelete(req.params.taskId);
+    const deletedTask = await Task.findByIdAndDelete(req.params.id);
 
     if (!deletedTask) {
       return next(new AppError('Task not found', 404));
@@ -125,4 +105,4 @@ async function deleteTask(req, res, next) {
 }
 
 
-module.exports = { createTask, taskStatus, viewTask, updateTask, deleteTask }
+module.exports = { createTask, updateStatus, viewTask, updateTask, deleteTask }

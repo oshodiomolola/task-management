@@ -38,8 +38,8 @@ async function login(req, res, next) {
     if (!isValidUser) {
       return next(new AppError("this user is not found. kindly sign up", 404));
     }
-    console.log(loginDetails.password, isValidUser.password)
-    // compare user password
+    console.log(loginDetails.password, isValidUser.password);
+    
     const isValidPassowrd = await isValidUser.isValidPassword(
       loginDetails.password,
       isValidUser.password
@@ -48,19 +48,16 @@ async function login(req, res, next) {
     if (!isValidPassowrd) {
       return next(new AppError("invalid password or email", 401));
     }
-    // generate a token for use
-    const token = await jwtToken(isValidUser._id);
 
+    const token = await jwtToken(isValidUser._id);
     res.cookie("jwt", token, { httpOnly: true });
-    // console.log(req.cookie)
-    res
-      .status(200)
-      .json({
-        result: "SUCCESS",
-        Message: "You are logged in now",
-        token,
-        user: { email: isValidUser.email, username: isValidUser.username },
-      });
+
+    res.status(200).json({
+      result: "SUCCESS",
+      Message: "You are logged in now",
+      token,
+      user: { email: isValidUser.email, username: isValidUser.username },
+    });
   } catch (err) {
     next(new AppError(err, 500));
   }
